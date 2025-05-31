@@ -9,40 +9,28 @@ class TaxDeclaration extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
-        'declaration_year',
-        'total_gross_income',
-        'total_taxable_income',
+        'total_income',
         'total_deductions',
-        'personal_deduction',
-        'dependent_deduction',
-        'insurance_deduction',
-        'charitable_deduction',
-        'tax_base_income',
-        'total_tax_payable',
-        'total_tax_withheld',
-        'tax_difference',
-        'status',
-        'details_json',
+        'taxable_income',
+        'calculated_tax',
+        'declaration_month', // Thêm declaration_month
+        'declaration_year',  // Thêm declaration_year
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'details_json' => 'array', // Tự động cast JSON field thành mảng PHP
+        'total_income' => 'float',
+        'total_deductions' => 'float',
+        'taxable_income' => 'float',
+        'calculated_tax' => 'float',
+        'declaration_month' => 'integer',
+        'declaration_year' => 'integer',
     ];
 
     /**
-     * Get the user that owns the tax declaration.
+     * Định nghĩa mối quan hệ với User.
+     * Một khai báo thuế thuộc về một người dùng.
      */
     public function user()
     {

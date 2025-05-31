@@ -4,24 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\IncomeSource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Để lấy thông tin người dùng hiện tại
-use Illuminate\Validation\Rule; // Để sử dụng validation Rule
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class IncomeSourceController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Hiển thị danh sách các nguồn thu nhập của người dùng hiện tại.
      */
     public function index()
     {
-        // Lấy tất cả nguồn thu nhập thuộc về người dùng đang đăng nhập, sắp xếp theo năm giảm dần
-        $incomeSources = Auth::user()->incomeSources()->orderBy('year', 'desc')->get();
-
+        $incomeSources = Auth::user()->incomeSources()->get();
         return view('income_sources.index', compact('incomeSources'));
     }
 
     /**
-     * Hiển thị form để tạo mới một nguồn thu nhập.
+     * Hiển thị form để tạo nguồn thu nhập mới.
      */
     public function create()
     {
@@ -33,80 +32,69 @@ class IncomeSourceController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'source_name' => 'required|string|max:255',
-            'type' => ['required', 'string', Rule::in(['salary', 'business', 'capital_investment', 'other'])], // Thêm các loại thu nhập nếu cần
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1), // Năm hợp lệ
-            'total_taxable_income' => 'required|numeric|min:0',
-            'tax_withheld' => 'nullable|numeric|min:0', // Có thể không có thuế khấu trừ
-            'notes' => 'nullable|string|max:1000',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'frequency' => 'required|in:monthly,yearly,one-time', // Validate frequency
+            'description' => 'nullable|string|max:1000', // Validate description
         ]);
 
-        Auth::user()->incomeSources()->create($validated);
+        Auth::user()->incomeSources()->create([
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'frequency' => $request->frequency,
+            'description' => $request->description,
+        ]);
 
         return redirect()->route('income_sources.index')->with('success', 'Nguồn thu nhập đã được thêm thành công!');
     }
 
     /**
      * Hiển thị form để chỉnh sửa một nguồn thu nhập.
-     * @param  \App\Models\IncomeSource  $incomeSource
-     * @return \Illuminate\Http\Response
      */
     public function edit(IncomeSource $incomeSource)
     {
-        // Đảm bảo người dùng chỉ có thể chỉnh sửa nguồn thu nhập của chính họ
-        if ($incomeSource->user_id !== Auth::id()) {
-            abort(403, 'Bạn không có quyền truy cập nguồn thu nhập này.');
-        }
+        // Đảm bảo người dùng chỉ có thể sửa nguồn thu nhập của chính họ
+        $this->authorize('update', $incomeSource); // Sử dụng Laravel Policies nếu bạn đã tạo
 
-        return response(view('income_sources.edit', compact('incomeSource')));
+        return view('income_sources.edit', compact('incomeSource'));
     }
 
     /**
-     * Cập nhật một nguồn thu nhập đã tồn tại trong cơ sở dữ liệu.
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\IncomeSource  $incomeSource
-     * @return \Illuminate\Http\Response
+     * Cập nhật một nguồn thu nhập trong cơ sở dữ liệu.
      */
     public function update(Request $request, IncomeSource $incomeSource)
     {
         // Đảm bảo người dùng chỉ có thể cập nhật nguồn thu nhập của chính họ
-        if ($incomeSource->user_id !== Auth::id()) {
-            abort(403, 'Bạn không có quyền cập nhật nguồn thu nhập này.');
-        }
+        $this->authorize('update', $incomeSource); // Sử dụng Laravel Policies nếu bạn đã tạo
 
-        $validated = $request->validate([
-            'source_name' => 'required|string|max:255',
-            'type' => ['required', 'string', Rule::in(['salary', 'business', 'capital_investment', 'other'])],
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'total_taxable_income' => 'required|numeric|min:0',
-            'tax_withheld' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string|max:1000',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'frequency' => 'required|in:monthly,yearly,one-time', // Validate frequency
+            'description' => 'nullable|string|max:1000', // Validate description
         ]);
 
-        $incomeSource->update($validated);
+        $incomeSource->update([
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'frequency' => $request->frequency,
+            'description' => $request->description,
+        ]);
 
-        return response(
-            redirect()->route('income_sources.index')->with('success', 'Nguồn thu nhập đã được cập nhật thành công!')
-        );
+        return redirect()->route('income_sources.index')->with('success', 'Nguồn thu nhập đã được cập nhật thành công!');
     }
 
     /**
      * Xóa một nguồn thu nhập khỏi cơ sở dữ liệu.
-     * @param  \App\Models\IncomeSource  $incomeSource
-     * @return \Illuminate\Http\Response
      */
     public function destroy(IncomeSource $incomeSource)
     {
         // Đảm bảo người dùng chỉ có thể xóa nguồn thu nhập của chính họ
-        if ($incomeSource->user_id !== Auth::id()) {
-            abort(403, 'Bạn không có quyền xóa nguồn thu nhập này.');
-        }
+        $this->authorize('delete', $incomeSource); // Sử dụng Laravel Policies nếu bạn đã tạo
 
         $incomeSource->delete();
 
-        return response(
-            redirect()->route('income_sources.index')->with('success', 'Nguồn thu nhập đã được xóa thành công!')
-        );
+        return redirect()->route('income_sources.index')->with('success', 'Nguồn thu nhập đã được xóa thành công!');
     }
 }

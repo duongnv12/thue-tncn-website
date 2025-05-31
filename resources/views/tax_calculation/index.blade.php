@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tính toán Thuế TNCN') }}
+            {{ __('Tính Thuế Thu nhập cá nhân') }}
         </h2>
     </x-slot>
 
@@ -9,70 +9,69 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Chọn năm và nhập các khoản giảm trừ khác để tính toán thuế</h3>
-
-                    @if ($errors->any())
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                    @if (session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('tax_calculation.calculate') }}">
+                    <p class="mb-4 text-gray-700">
+                        Hệ thống sẽ tự động tổng hợp thu nhập hàng tháng từ các "Nguồn Thu nhập" và số lượng "Người phụ thuộc" bạn đã khai báo để tính thuế TNCN.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-blue-50 p-4 rounded-lg shadow-sm">
+                            <h3 class="font-semibold text-blue-800 text-lg mb-2">Thông tin Thu nhập & Giảm trừ (Tháng {{ $currentMonth }}/{{ $currentYear }})</h3>
+                            <div class="mb-2">
+                                <span class="font-medium">Tổng thu nhập chịu thuế:</span> {{ number_format($totalIncome, 0, ',', '.') }} VNĐ
+                            </div>
+                            <div class="mb-2">
+                                <span class="font-medium">Số người phụ thuộc:</span> {{ $numDependents }} người
+                            </div>
+                            @if($totalDeductions !== null)
+                                <div class="mb-2">
+                                    <span class="font-medium">Tổng giảm trừ gia cảnh:</span> {{ number_format($totalDeductions, 0, ',', '.') }} VNĐ
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="bg-green-50 p-4 rounded-lg shadow-sm">
+                            <h3 class="font-semibold text-green-800 text-lg mb-2">Kết quả tính toán (Nếu có)</h3>
+                            @if ($calculatedTax !== null)
+                                <div class="mb-2">
+                                    <span class="font-medium">Thu nhập tính thuế:</span> {{ number_format($taxableIncome, 0, ',', '.') }} VNĐ
+                                </div>
+                                <div class="mb-2 text-xl font-bold text-green-900">
+                                    <span class="font-medium">Thuế TNCN phải nộp:</span> {{ number_format($calculatedTax, 0, ',', '.') }} VNĐ
+                                </div>
+                            @else
+                                <p class="text-gray-600">Chưa có kết quả tính thuế. Nhấn "Tính và Lưu khai báo" bên dưới.</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('tax_calculation.calculate_and_save') }}">
                         @csrf
-
-                        <div class="mb-4">
-                            <x-input-label for="year" :value="__('Năm tính thuế')" />
-                            <select id="year" name="year" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                @for ($i = date('Y'); $i >= date('Y') - 10; $i--)
-                                    <option value="{{ $i }}" {{ old('year', $currentYear) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                @endfor
-                            </select>
-                            <x-input-error :messages="$errors->get('year')" class="mt-2" />
-                        </div>
-
-                        {{-- Các trường nhập liệu mới cho giảm trừ khác --}}
-                        <div class="mb-4">
-                            <x-input-label for="insurance_deduction_amount" :value="__('Tổng đóng góp Bảo hiểm bắt buộc trong năm (VND)')" />
-                            <x-text-input id="insurance_deduction_amount" class="block mt-1 w-full" type="number" name="insurance_deduction_amount" :value="old('insurance_deduction_amount', 0)" min="0" step="any" placeholder="Ví dụ: 10000000 (10 triệu VND)" />
-                            <x-input-error :messages="$errors->get('insurance_deduction_amount')" class="mt-2" />
-                            <p class="text-sm text-gray-500 mt-1">Tổng số tiền BHXH, BHYT, BHTN đã đóng trong năm.</p>
-                        </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="charitable_deduction_amount" :value="__('Tổng đóng góp Từ thiện, nhân đạo, khuyến học trong năm (VND)')" />
-                            <x-text-input id="charitable_deduction_amount" class="block mt-1 w-full" type="number" name="charitable_deduction_amount" :value="old('charitable_deduction_amount', 0)" min="0" step="any" placeholder="Ví dụ: 5000000 (5 triệu VND)" />
-                            <x-input-error :messages="$errors->get('charitable_deduction_amount')" class="mt-2" />
-                            <p class="text-sm text-gray-500 mt-1">Số tiền đóng góp từ thiện, nhân đạo, khuyến học (cần có chứng từ hợp lệ).</p>
-                        </div>
-
-
-                        <div class="flex items-center justify-end mt-4">
-                            <x-primary-button>
-                                {{ __('Tính toán Thuế') }}
-                            </x-primary-button>
-                        </div>
+                        <x-primary-button>
+                            {{ __('Tính và Lưu khai báo cho Tháng hiện tại') }}
+                        </x-primary-button>
+                        <p class="text-sm text-gray-500 mt-2">
+                            (Tháng hiện tại: {{ $currentMonth }}/{{ $currentYear }})
+                        </p>
                     </form>
 
-                    <div class="mt-6 border-t pt-4">
-                        <h4 class="text-md font-medium text-gray-900">Các năm bạn đã có nguồn thu nhập:</h4>
-                        @if ($availableYears->isEmpty())
-                            <p class="text-sm text-gray-600">Chưa có nguồn thu nhập nào được ghi nhận.</p>
-                        @else
-                            <ul class="list-disc list-inside mt-2 text-sm text-gray-600">
-                                @foreach ($availableYears as $year)
-                                    <li>Năm {{ $year }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
-                        <p class="mt-4 text-sm text-gray-600">
-                            Để tính toán thuế, bạn cần đảm bảo đã nhập đầy đủ các nguồn thu nhập và người phụ thuộc cho năm đã chọn.
-                        </p>
+                    <div class="mt-8 pt-8 border-t border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Các bước để tính thuế chính xác:</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                            <li>Đảm bảo bạn đã khai báo đầy đủ và chính xác tất cả các <a href="{{ route('income_sources.index') }}" class="text-indigo-600 hover:underline">nguồn thu nhập hàng tháng</a>.</li>
+                            <li>Khai báo đầy đủ và chính xác tất cả <a href="{{ route('dependents.index') }}" class="text-indigo-600 hover:underline">người phụ thuộc</a> của bạn.</li>
+                            <li>Nhấn nút "Tính và Lưu khai báo" để hệ thống tự động tính toán dựa trên dữ liệu hiện có và lưu lại.</li>
+                            <li>Bạn có thể xem lại các khai báo đã lưu trong <a href="{{ route('tax_declarations.index') }}" class="text-indigo-600 hover:underline">Lịch sử Khai báo</a>.</li>
+                        </ol>
                     </div>
+
                 </div>
             </div>
         </div>
-    </x-app-layout>
+    </div>
+</x-app-layout>

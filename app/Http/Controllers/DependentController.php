@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Dependent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 
 class DependentController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Hiển thị danh sách người phụ thuộc của người dùng hiện tại.
      */
@@ -19,7 +21,7 @@ class DependentController extends Controller
     }
 
     /**
-     * Hiển thị form để tạo mới một người phụ thuộc.
+     * Hiển thị form để tạo người phụ thuộc mới.
      */
     public function create()
     {
@@ -31,16 +33,19 @@ class DependentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
-            'citizen_id' => 'nullable|string|max:20',
-            'relationship' => ['required', 'string', Rule::in(['con', 'vo', 'chong', 'cha', 'me', 'khac'])],
-            'months_registered' => 'required|integer|min:1|max:12',
-            'notes' => 'nullable|string|max:1000',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date|before_or_equal:today',
+            'relationship' => 'required|string|max:255',
+            'tax_code' => 'nullable|string|max:20|unique:dependents,tax_code,NULL,id,user_id,' . Auth::id(), // Đảm bảo MST là duy nhất cho mỗi người dùng
         ]);
 
-        Auth::user()->dependents()->create($validated);
+        Auth::user()->dependents()->create([
+            'name' => $request->name,
+            'date_of_birth' => $request->date_of_birth,
+            'relationship' => $request->relationship,
+            'tax_code' => $request->tax_code,
+        ]);
 
         return redirect()->route('dependents.index')->with('success', 'Người phụ thuộc đã được thêm thành công!');
     }
@@ -50,31 +55,33 @@ class DependentController extends Controller
      */
     public function edit(Dependent $dependent)
     {
-        if ($dependent->user_id !== Auth::id()) {
-            abort(403, 'Bạn không có quyền truy cập người phụ thuộc này.');
-        }
+        // Đảm bảo người dùng chỉ có thể sửa người phụ thuộc của chính họ
+        $this->authorize('update', $dependent); // Sử dụng Laravel Policies nếu bạn đã tạo
+
         return view('dependents.edit', compact('dependent'));
     }
 
     /**
-     * Cập nhật một người phụ thuộc đã tồn tại trong cơ sở dữ liệu.
+     * Cập nhật một người phụ thuộc trong cơ sở dữ liệu.
      */
     public function update(Request $request, Dependent $dependent)
     {
-        if ($dependent->user_id !== Auth::id()) {
-            abort(403, 'Bạn không có quyền cập nhật người phụ thuộc này.');
-        }
+        // Đảm bảo người dùng chỉ có thể cập nhật người phụ thuộc của chính họ
+        $this->authorize('update', $dependent); // Sử dụng Laravel Policies nếu bạn đã tạo
 
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
-            'citizen_id' => 'nullable|string|max:20',
-            'relationship' => ['required', 'string', Rule::in(['con', 'vo', 'chong', 'cha', 'me', 'khac'])],
-            'months_registered' => 'required|integer|min:1|max:12',
-            'notes' => 'nullable|string|max:1000',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date|before_or_equal:today',
+            'relationship' => 'required|string|max:255',
+            'tax_code' => ['nullable', 'string', 'max:20', Rule::unique('dependents')->ignore($dependent->id)], // Đảm bảo MST là duy nhất
         ]);
 
-        $dependent->update($validated);
+        $dependent->update([
+            'name' => $request->name,
+            'date_of_birth' => $request->date_of_birth,
+            'relationship' => $request->relationship,
+            'tax_code' => $request->tax_code,
+        ]);
 
         return redirect()->route('dependents.index')->with('success', 'Người phụ thuộc đã được cập nhật thành công!');
     }
@@ -84,9 +91,8 @@ class DependentController extends Controller
      */
     public function destroy(Dependent $dependent)
     {
-        if ($dependent->user_id !== Auth::id()) {
-            abort(403, 'Bạn không có quyền xóa người phụ thuộc này.');
-        }
+        // Đảm bảo người dùng chỉ có thể xóa người phụ thuộc của chính họ
+        $this->authorize('delete', $dependent); // Sử dụng Laravel Policies nếu bạn đã tạo
 
         $dependent->delete();
 

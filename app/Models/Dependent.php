@@ -9,23 +9,21 @@ class Dependent extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
-        'full_name',
+        'name',
         'date_of_birth',
-        'citizen_id',
         'relationship',
-        'months_registered',
-        'notes',
+        'tax_code', // Thêm tax_code
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date', // Ép kiểu ngày sinh thành Carbon instance
     ];
 
     /**
-     * Get the user that owns the dependent.
+     * Định nghĩa mối quan hệ với User.
+     * Một người phụ thuộc thuộc về một người dùng.
      */
     public function user()
     {

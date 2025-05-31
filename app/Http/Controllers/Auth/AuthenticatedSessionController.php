@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User; // Thêm dòng này để sử dụng Model User
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,6 +29,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Lấy thông tin người dùng đã đăng nhập
+        $user = Auth::user();
+
+        // Kiểm tra xem người dùng có vai trò admin không
+        if ($user && $user->is_admin) {
+            // Nếu là admin, chuyển hướng đến admin dashboard
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        // Nếu không phải admin, chuyển hướng đến dashboard mặc định (hoặc trang chủ)
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

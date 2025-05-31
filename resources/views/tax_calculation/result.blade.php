@@ -19,12 +19,12 @@
                         <div>
                             <p class="text-sm text-gray-600">Tổng giảm trừ gia cảnh:</p>
                             <p class="text-lg font-semibold text-gray-900">{{ number_format($calculationResult['total_deductions'], 0, ',', '.') }} VND</p>
-                            <ul class="text-sm text-gray-600 ml-4">
-                                <li>Giảm trừ bản thân: {{ number_format($calculationResult['personal_deduction'], 0, ',', '.') }} VND</li>
-                                <li>Giảm trừ người phụ thuộc: {{ number_format($calculationResult['dependent_deduction'], 0, ',', '.') }} VND</li>
-                                <li>Giảm trừ bảo hiểm: {{ number_format($calculationResult['insurance_deduction'], 0, ',', '.') }} VND</li> 
-                                <li>Giảm trừ từ thiện: {{ number_format($calculationResult['charitable_deduction'], 0, ',', '.') }} VND</li>
-                            </ul>
+                                <ul class="text-sm text-gray-600 ml-4">
+                                    <li>Giảm trừ bản thân: {{ number_format($calculationResult['personal_deduction'], 0, ',', '.') }} VND ({{ number_format($calculationResult['personal_deduction_rate'], 0, ',', '.') }} VND/tháng)</li>
+                                    <li>Giảm trừ người phụ thuộc: {{ number_format($calculationResult['dependent_deduction'], 0, ',', '.') }} VND ({{ number_format($calculationResult['dependent_deduction_rate'], 0, ',', '.') }} VND/người/tháng)</li>
+                                    <li>Giảm trừ bảo hiểm: {{ number_format($calculationResult['insurance_deduction'], 0, ',', '.') }} VND</li>
+                                    <li>Giảm trừ từ thiện: {{ number_format($calculationResult['charitable_deduction'], 0, ',', '.') }} VND</li>
+                                </ul>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Thu nhập tính thuế (sau giảm trừ):</p>

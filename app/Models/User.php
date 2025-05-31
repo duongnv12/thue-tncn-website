@@ -6,11 +6,10 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,9 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'address', // Thêm
-        'phone_number', // Thêm
-        'tax_id_number', // Thêm
+        'is_admin', // Thêm is_admin vào fillable
     ];
 
     /**
@@ -37,28 +34,41 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_admin' => 'boolean', // Ép kiểu is_admin về boolean
+        ];
+    }
 
-    // Mối quan hệ với IncomeSource
+    /**
+     * Định nghĩa mối quan hệ với IncomeSource.
+     * Một người dùng có nhiều nguồn thu nhập.
+     */
     public function incomeSources()
     {
         return $this->hasMany(IncomeSource::class);
     }
 
-    // Mối quan hệ với Dependent
+    /**
+     * Định nghĩa mối quan hệ với Dependent.
+     * Một người dùng có nhiều người phụ thuộc.
+     */
     public function dependents()
     {
         return $this->hasMany(Dependent::class);
     }
 
-    // Mối quan hệ với TaxDeclaration
+    /**
+     * Định nghĩa mối quan hệ với TaxDeclaration.
+     * Một người dùng có nhiều khai báo thuế.
+     */
     public function taxDeclarations()
     {
         return $this->hasMany(TaxDeclaration::class);

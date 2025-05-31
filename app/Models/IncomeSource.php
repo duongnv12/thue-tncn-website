@@ -9,23 +9,21 @@ class IncomeSource extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
-        'source_name',
-        'type',
-        'year',
-        'total_taxable_income',
-        'tax_withheld',
-        'notes',
+        'name',
+        'amount',
+        'frequency', // Thêm frequency
+        'description', // Thêm description
+    ];
+
+    protected $casts = [
+        'amount' => 'float', // Ép kiểu amount thành float
     ];
 
     /**
-     * Get the user that owns the income source.
+     * Định nghĩa mối quan hệ với User.
+     * Một nguồn thu nhập thuộc về một người dùng.
      */
     public function user()
     {

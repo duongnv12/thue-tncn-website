@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('dependents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('full_name'); // Họ và tên người phụ thuộc
-            $table->string('date_of_birth')->nullable(); // Ngày sinh (có thể là string hoặc date)
-            $table->string('citizen_id')->nullable(); // Số CCCD/CMND của người phụ thuộc (nếu có)
-            $table->string('relationship'); // Mối quan hệ (con, cha, mẹ, vợ, chồng,...)
-            $table->integer('months_registered')->default(12); // Số tháng được tính giảm trừ trong năm
-            $table->text('notes')->nullable();
+            $table->string('name');
+            $table->date('date_of_birth');
+            $table->string('relationship'); // Ví dụ: 'child', 'parent', 'spouse'
+            $table->string('tax_code')->nullable(); // Mã số thuế người phụ thuộc
             $table->timestamps();
         });
     }
