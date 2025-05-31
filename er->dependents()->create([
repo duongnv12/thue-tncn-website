@@ -1,0 +1,24 @@
+[90m= [39m[34;4mApp\Models\IncomeSource[39;24m {#6327
+    [34msource_name[39m: "[32mCông ty ABC[39m",
+    [34mtype[39m: "[32msalary[39m",
+    [34myear[39m: [35m2024[39m,
+    [34mtotal_taxable_income[39m: [35m150000000[39m,
+    [34mtax_withheld[39m: [35m10000000[39m,
+    [34muser_id[39m: [35m1[39m,
+    [34mupdated_at[39m: "[32m2025-05-31 05:34:46[39m",
+    [34mcreated_at[39m: "[32m2025-05-31 05:34:46[39m",
+    [34mid[39m: [35m1[39m,
+  }
+
+[90m= [39m[34;4mApp\Models\IncomeSource[39;24m {#6327
+    [34msource_name[39m: "[32mCông ty ABC[39m",
+    [34mtype[39m: "[32msalary[39m",
+    [34myear[39m: [35m2024[39m,
+    [34mtotal_taxable_income[39m: [35m150000000[39m,
+    [34mtax_withheld[39m: [35m10000000[39m,
+    [34muser_id[39m: [35m1[39m,
+    [34mupdated_at[39m: "[32m2025-05-31 05:34:46[39m",
+    [34mcreated_at[39m: "[32m2025-05-31 05:34:46[39m",
+    [34mid[39m: [35m1[39m,
+  }
+
