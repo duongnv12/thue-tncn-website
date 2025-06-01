@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TaxSetting;
 use App\Models\TaxBracket;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule; // Để sử dụng Rule::unique
+use Illuminate\Validation\Rule;
 
 class TaxSettingsController extends Controller
 {
@@ -15,103 +15,127 @@ class TaxSettingsController extends Controller
      */
     public function index()
     {
-        $taxSettings = TaxSetting::all();
+        // Lấy tất cả cài đặt và key theo setting_key để dễ dàng truy cập trong view
+        $taxSettings = TaxSetting::all()->keyBy('setting_key');
         $taxBrackets = TaxBracket::orderBy('bracket_number')->get();
 
         return view('admin.tax_settings.index', compact('taxSettings', 'taxBrackets'));
     }
 
     /**
-     * Cập nhật các cài đặt thuế chung (giảm trừ gia cảnh).
+     * Cập nhật các cài đặt thuế chung (giảm trừ gia cảnh và bảo hiểm).
      */
     public function updateSettings(Request $request)
     {
         $request->validate([
             'personal_deduction' => 'required|numeric|min:0',
             'dependent_deduction' => 'required|numeric|min:0',
+            'bhxh_employee_rate' => 'required|numeric|min:0|max:100', // Tỷ lệ %
+            'bhyc_employee_rate' => 'required|numeric|min:0|max:100', // Tỷ lệ %
+            'bhtn_employee_rate' => 'required|numeric|min:0|max:100', // Tỷ lệ %
+            'insurance_base_cap' => 'required|numeric|min:0', // Mức VNĐ
+            'regional_minimum_wage' => 'required|numeric|min:0', // Mức VNĐ
         ]);
 
+        // Cập nhật hoặc tạo mới các cài đặt
         TaxSetting::updateOrCreate(
             ['setting_key' => 'personal_deduction'],
             ['setting_value' => $request->personal_deduction]
         );
-
         TaxSetting::updateOrCreate(
             ['setting_key' => 'dependent_deduction'],
             ['setting_value' => $request->dependent_deduction]
         );
+        TaxSetting::updateOrCreate(
+            ['setting_key' => 'bhxh_employee_rate'],
+            ['setting_value' => $request->bhxh_employee_rate]
+        );
+        TaxSetting::updateOrCreate(
+            ['setting_key' => 'bhyc_employee_rate'],
+            ['setting_value' => $request->bhyc_employee_rate]
+        );
+        TaxSetting::updateOrCreate(
+            ['setting_key' => 'bhtn_employee_rate'],
+            ['setting_value' => $request->bhtn_employee_rate]
+        );
+        TaxSetting::updateOrCreate(
+            ['setting_key' => 'insurance_base_cap'],
+            ['setting_value' => $request->insurance_base_cap]
+        );
+        TaxSetting::updateOrCreate(
+            ['setting_key' => 'regional_minimum_wage'],
+            ['setting_value' => $request->regional_minimum_wage]
+        );
 
-        return redirect()->route('admin.tax_settings.index')->with('success', 'Cài đặt giảm trừ gia cảnh đã được cập nhật.');
+
+        return redirect()->route('admin.tax_settings.index')->with('success', 'Cài đặt thuế và bảo hiểm đã được cập nhật.');
     }
 
     /**
-     * Hiển thị form chỉnh sửa một bậc thuế.
+     * Hiển thị form tạo bậc thuế mới.
      */
-    public function editBracket(TaxBracket $taxBracket)
+    public function createBracket()
     {
-        return view('admin.tax_settings.edit_bracket', compact('taxBracket'));
+        // Lấy bậc thuế cuối cùng để gợi ý bracket_number tiếp theo
+        $lastBracket = TaxBracket::orderByDesc('bracket_number')->first();
+        $nextBracketNumber = $lastBracket ? $lastBracket->bracket_number + 1 : 1;
+
+        return view('admin.tax_settings.create_bracket', compact('nextBracketNumber'));
     }
 
     /**
-     * Cập nhật một bậc thuế.
+     * Lưu bậc thuế mới vào CSDL.
      */
-    public function updateBracket(Request $request, TaxBracket $taxBracket)
+    public function storeBracket(Request $request)
     {
         $request->validate([
-            'bracket_number' => ['required', 'integer', 'min:1', Rule::unique('tax_brackets')->ignore($taxBracket->id)],
+            'bracket_number' => 'required|integer|min:1|unique:tax_brackets,bracket_number',
             'min_income' => 'required|numeric|min:0',
             'max_income' => 'nullable|numeric|gt:min_income', // max_income phải lớn hơn min_income nếu có
             'tax_rate' => 'required|numeric|min:0|max:100',
         ]);
 
-        // Đảm bảo max_income là null nếu không được cung cấp (cho bậc cuối cùng)
-        $max_income = $request->filled('max_income') ? $request->max_income : null;
+        TaxBracket::create($request->all());
 
-        $taxBracket->update([
-            'bracket_number' => $request->bracket_number,
-            'min_income' => $request->min_income,
-            'max_income' => $max_income,
-            'tax_rate' => $request->tax_rate,
-        ]);
-
-        return redirect()->route('admin.tax_settings.index')->with('success', 'Bậc thuế đã được cập nhật.');
+        return redirect()->route('admin.tax_settings.index')->with('success', 'Bậc thuế mới đã được thêm thành công.');
     }
 
     /**
-     * Thêm một bậc thuế mới.
+     * Hiển thị form sửa đổi bậc thuế.
      */
-    public function createBracket()
+    public function editBracket(TaxBracket $bracket)
     {
-        return view('admin.tax_settings.create_bracket');
+        return view('admin.tax_settings.edit_bracket', compact('bracket'));
     }
 
-    public function storeBracket(Request $request)
+    /**
+     * Cập nhật thông tin bậc thuế.
+     */
+    public function updateBracket(Request $request, TaxBracket $bracket)
     {
         $request->validate([
-            'bracket_number' => ['required', 'integer', 'min:1', 'unique:tax_brackets,bracket_number'],
+            'bracket_number' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('tax_brackets')->ignore($bracket->id), // bỏ qua chính nó khi kiểm tra unique
+            ],
             'min_income' => 'required|numeric|min:0',
             'max_income' => 'nullable|numeric|gt:min_income',
             'tax_rate' => 'required|numeric|min:0|max:100',
         ]);
 
-        $max_income = $request->filled('max_income') ? $request->max_income : null;
+        $bracket->update($request->all());
 
-        TaxBracket::create([
-            'bracket_number' => $request->bracket_number,
-            'min_income' => $request->min_income,
-            'max_income' => $max_income,
-            'tax_rate' => $request->tax_rate,
-        ]);
-
-        return redirect()->route('admin.tax_settings.index')->with('success', 'Bậc thuế mới đã được thêm.');
+        return redirect()->route('admin.tax_settings.index')->with('success', 'Bậc thuế đã được cập nhật thành công.');
     }
 
     /**
      * Xóa một bậc thuế.
      */
-    public function deleteBracket(TaxBracket $taxBracket)
+    public function destroyBracket(TaxBracket $bracket)
     {
-        $taxBracket->delete();
+        $bracket->delete();
         return redirect()->route('admin.tax_settings.index')->with('success', 'Bậc thuế đã được xóa.');
     }
 }

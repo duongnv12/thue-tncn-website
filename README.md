@@ -1,144 +1,129 @@
-# Ứng dụng Tính Thuế Thu Nhập Cá Nhân (TNCN)
+# Hệ thống Quản lý và Tính toán Thuế Thu nhập Cá nhân (TNCN) Toàn diện
 
-Đây là một ứng dụng web được xây dựng bằng Laravel, giúp cá nhân quản lý thu nhập, người phụ thuộc và tự động tính toán thuế thu nhập cá nhân theo quy định của pháp luật Việt Nam. Hệ thống cũng cung cấp một bảng điều khiển quản trị mạnh mẽ để quản lý người dùng và cấu hình các tham số thuế.
-
----
-
-## 1. Tính năng chính
-
-### 1.1. Dành cho Người dùng (Cá nhân nộp thuế)
-
-* **Quản lý Tài khoản:** Đăng ký, đăng nhập, cập nhật thông tin cá nhân (profile).
-* **Quản lý Nguồn Thu nhập:** Thêm, xem, sửa, xóa các khoản thu nhập. Mỗi nguồn thu nhập có thể được khai báo theo **tần suất hàng tháng**.
-* **Quản lý Người phụ thuộc:** Thêm, xem, sửa, xóa thông tin người phụ thuộc để tính giảm trừ gia cảnh.
-* **Tính toán Thuế TNCN theo tháng:** Tự động tổng hợp thu nhập và người phụ thuộc, áp dụng giảm trừ gia cảnh và biểu thuế lũy tiến để tính số thuế phải nộp trong tháng.
-* **Lịch sử Khai báo:** Lưu trữ và xem lại các lần tính toán thuế đã thực hiện.
-* **Thống kê Thuế cá nhân:** Xem tổng quan thu nhập và thuế đã nộp theo từng năm.
-
-### 1.2. Dành cho Quản trị viên (Admin)
-
-* **Admin Dashboard:** Tổng quan hệ thống với các số liệu thống kê và danh sách người dùng gần đây.
-* **Quản lý Người dùng:** Xem, chỉnh sửa (bao gồm cấp/thu hồi quyền Admin, đặt lại mật khẩu), xóa tài khoản người dùng.
-* **Cài đặt Tham số Thuế:**
-    * **Quản lý Giảm trừ Gia cảnh:** Cập nhật mức giảm trừ bản thân và mức giảm trừ cho mỗi người phụ thuộc.
-    * **Quản lý Biểu thuế Lũy tiến:** Xem, thêm, sửa, xóa các bậc thuế thu nhập (mức thu nhập tối thiểu/tối đa, tỷ lệ thuế).
+Đây là một ứng dụng web hiện đại được xây dựng trên nền tảng Laravel, cung cấp một giải pháp tự động và thông minh để quản lý thu nhập, người phụ thuộc và tính toán nghĩa vụ Thuế Thu nhập Cá nhân (TNCN) tại Việt Nam. Mục tiêu của hệ thống là đơn giản hóa quy trình khai báo thuế vốn phức tạp, mang lại sự minh bạch và dễ hiểu cho từng khoản thu nhập và nghĩa vụ thuế của cá nhân.
 
 ---
 
-## 2. Công nghệ sử dụng
+## Các Tính năng nổi bật
 
-* **Framework:** Laravel (PHP)
-* **Frontend:** Blade Templates, Tailwind CSS, Alpine.js (Thông qua Laravel Breeze)
-* **Cơ sở dữ liệu:** MySQL (hoặc bất kỳ DB nào Laravel hỗ trợ)
+### **1. Tính toán Thuế TNCN tự động và Minh bạch**
+* **Đồng bộ Thu nhập (Gross) tức thì:** Hệ thống tự động tổng hợp tất cả các khoản thu nhập (Gross) mà người dùng đã khai báo từ các nguồn khác nhau. Ngay lập tức, bạn sẽ thấy kết quả tính toán thuế mà không cần bất kỳ thao tác thủ công phức tạp nào.
+* **Phân tích chi tiết các khoản giảm trừ:**
+    * **Bảo hiểm bắt buộc:** Tự động tính toán các khoản đóng Bảo hiểm xã hội (BHXH), Bảo hiểm y tế (BHYT), Bảo hiểm thất nghiệp (BHTN) theo tỷ lệ quy định hiện hành, dựa trên mức thu nhập của bạn hoặc mức trần bảo hiểm.
+    * **Giảm trừ gia cảnh:** Áp dụng mức giảm trừ bản thân và giảm trừ cho người phụ thuộc theo quy định của pháp luật Việt Nam, giúp bạn tối ưu hóa số thuế phải nộp.
+* **Biểu thuế lũy tiến rõ ràng:** Hệ thống sẽ phân tích thu nhập tính thuế của bạn và áp dụng đúng biểu thuế lũy tiến từng phần, hiển thị chi tiết số thuế phải nộp cho từng bậc, đảm bảo bạn hiểu rõ cách tính toán cuối cùng.
+* **Hiển thị Lương Net:** Ngoài số thuế phải nộp, ứng dụng còn tính toán và hiển thị ước tính lương thực nhận (Net) của bạn sau khi đã trừ đi các khoản bảo hiểm và thuế TNCN, giúp bạn có cái nhìn toàn diện về tài chính cá nhân.
+
+### **2. Quản lý dữ liệu tài chính cá nhân hiệu quả**
+* **Quản lý Nguồn thu nhập linh hoạt:** Dễ dàng thêm mới, chỉnh sửa hoặc xóa các nguồn thu nhập của bạn (ví dụ: lương chính, thu nhập phụ, tiền thưởng,...). Điều này giúp hệ thống luôn cập nhật thông tin tài chính cá nhân chính xác nhất.
+* **Quản lý Người phụ thuộc dễ dàng:** Khai báo và theo dõi thông tin chi tiết của người phụ thuộc (con cái, cha mẹ, vợ/chồng không có khả năng lao động,...). Mỗi người phụ thuộc hợp lệ sẽ được tính giảm trừ gia cảnh, trực tiếp ảnh hưởng đến số thuế bạn phải nộp.
+
+### **3. Lưu trữ và Tra cứu Lịch sử khai báo**
+* **Lưu trữ khai báo tháng:** Mọi kết quả tính toán thuế TNCN hàng tháng đều có thể được lưu lại vào lịch sử cá nhân của bạn, giúp bạn dễ dàng theo dõi sự biến động thu nhập và nghĩa vụ thuế qua thời gian.
+* **Xem chi tiết mọi lúc, mọi nơi:** Truy cập và xem lại bất kỳ bản khai báo thuế nào đã lưu với đầy đủ các thông số tính toán, chi tiết các khoản giảm trừ và bậc thuế áp dụng tại thời điểm khai báo.
+* **Xuất PDF chuyên nghiệp:** Chức năng xuất file PDF cho phép bạn tạo ra các bản báo cáo khai báo thuế chính thức, dễ dàng in ấn, lưu trữ offline hoặc gửi cho các bên liên quan khi cần thiết.
+
+### **4. Thống kê và Báo cáo Trực quan**
+* **Tổng quan tài chính hàng năm:** Cung cấp cái nhìn tổng hợp về tổng thu nhập và tổng số thuế TNCN đã nộp trong từng năm.
+* **Phân tích xu hướng hàng tháng:** Biểu đồ và bảng thống kê chi tiết theo từng tháng giúp bạn dễ dàng nhận diện xu hướng thu nhập và nghĩa vụ thuế của mình trong một năm cụ thể.
+* **Chọn năm linh hoạt:** Dễ dàng chuyển đổi giữa các năm để xem thống kê, giúp bạn so sánh và phân tích dữ liệu lịch sử một cách thuận tiện.
 
 ---
 
-## 3. Cài đặt và Chạy ứng dụng
+## Công nghệ sử dụng
 
-Làm theo các bước dưới đây để thiết lập và chạy ứng dụng trên máy local của bạn.
+* **Framework chính:** Laravel (PHP 10+)
+* **Cơ sở dữ liệu:** MySQL (hỗ trợ các hệ quản trị CSDL khác tương thích với Laravel Eloquent)
+* **Giao diện người dùng:** Blade Templates kết hợp với Tailwind CSS cho thiết kế hiện đại và responsive.
+* **Thư viện tạo PDF:** Barryvdh/laravel-dompdf, đảm bảo xuất file PDF chất lượng cao.
+* **Quản lý Dependencies:** Composer (cho PHP) và npm/Yarn (cho JavaScript/CSS).
 
-### 3.1. Yêu cầu hệ thống
+---
 
-* PHP >= 8.2
-* Composer
-* Node.js & npm (hoặc Yarn)
-* MySQL (hoặc cơ sở dữ liệu khác)
+## Hướng dẫn cài đặt và khởi chạy
 
-### 3.2. Các bước cài đặt
+Để cài đặt và trải nghiệm ứng dụng trên môi trường phát triển cục bộ, bạn chỉ cần thực hiện theo các bước sau:
 
-1.  **Clone Repository:**
+1.  **Clone Repository:** Tải mã nguồn về máy tính của bạn.
     ```bash
-    git clone <URL_REPOSITORY_CỦA_BẠN>
-    cd ten_thu_muc_du_an
+    git clone <đường_dẫn_đến_repository_của_bạn>
+    cd <tên_thư_mục_dự_án>
     ```
 
-2.  **Cài đặt các dependency của Composer:**
+2.  **Cài đặt Composer Dependencies:**
     ```bash
     composer install
     ```
 
-3.  **Cài đặt các dependency của Node.js và build tài nguyên frontend:**
+3.  **Cài đặt Node.js Dependencies (cho Tailwind CSS):**
     ```bash
     npm install
-    npm run dev # Hoặc npm run build cho môi trường production
+    # Hoặc nếu bạn dùng Yarn
+    yarn install
     ```
 
-4.  **Tạo và cấu hình file `.env`:**
+4.  **Tạo và Cấu hình file `.env`:**
+    Sao chép file cấu hình mẫu và cập nhật các thông số cần thiết như thông tin kết nối cơ sở dữ liệu (`DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`), và URL ứng dụng (`APP_URL`).
     ```bash
     cp .env.example .env
+    ```
+
+5.  **Tạo App Key:**
+    ```bash
     php artisan key:generate
     ```
-    Mở file `.env` và cấu hình thông tin kết nối cơ sở dữ liệu của bạn:
-    ```env
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=laravel_tax_app # Đổi tên database của bạn
-    DB_USERNAME=root # Tên người dùng database của bạn
-    DB_PASSWORD= # Mật khẩu database của bạn
-    ```
 
-5.  **Chạy Migrations và Seed dữ liệu mặc định:**
+6.  **Chuẩn bị Database:**
+    Đảm bảo bạn đã tạo một cơ sở dữ liệu trống trên MySQL (hoặc CSDL bạn lựa chọn) và thông tin đăng nhập đã được cập nhật chính xác trong file `.env`.
+
+7.  **Chạy Migrations và Seeder (nếu có):**
+    Thao tác này sẽ tạo cấu trúc bảng cần thiết trong cơ sở dữ liệu và điền các dữ liệu mặc định ban đầu (ví dụ: các cài đặt thuế cơ bản, thông tin người dùng mẫu nếu có).
     ```bash
-    php artisan migrate
+    php artisan migrate --seed
     ```
-    *Lưu ý:* Các migration đã bao gồm dữ liệu mặc định cho `tax_settings` và `tax_brackets`.
+    *Lưu ý:* Nếu bạn không có seeder dữ liệu mẫu, chỉ cần chạy `php artisan migrate`.
 
-6.  **Tạo tài khoản Admin:**
-    Để tạo tài khoản Admin, bạn có thể đăng ký một tài khoản bất kỳ trên ứng dụng, sau đó truy cập database và chỉnh sửa cột `is_admin` của tài khoản đó thành `1`.
+8.  **Compile Assets (CSS/JS):**
+    Biên dịch các file CSS và JavaScript. Sử dụng `npm run watch` trong quá trình phát triển để tự động cập nhật khi có thay đổi.
+    ```bash
+    npm run dev
+    # Hoặc để theo dõi thay đổi tự động
+    npm run watch
+    # Hoặc để build cho môi trường sản phẩm
+    npm run build
+    ```
 
-    * Cách 1 (Thủ công qua PhpMyAdmin/MySQL Workbench): Tìm bảng `users`, tìm tài khoản của bạn và sửa `is_admin` từ `0` thành `1`.
-    * Cách 2 (Sử dụng Artisan Tinker):
-        ```bash
-        php artisan tinker
-        >>> $user = App\Models\User::where('email', 'your_email@example.com')->first();
-        >>> $user->is_admin = 1;
-        >>> $user->save();
-        >>> exit;
-        ```
-
-7.  **Chạy ứng dụng:**
+9.  **Khởi chạy Ứng dụng Laravel:**
     ```bash
     php artisan serve
     ```
-    Ứng dụng sẽ khả dụng tại `http://127.0.0.1:8000`.
+    Ứng dụng của bạn giờ đây sẽ có thể truy cập qua trình duyệt tại địa chỉ `http://127.0.0.1:8000` (hoặc một cổng khác tùy thuộc vào cấu hình của bạn).
 
 ---
 
-## 4. Hướng dẫn sử dụng
+## Các Đường dẫn (Routes) chính
 
-### 4.1. Dành cho Người dùng thông thường
-
-1.  **Đăng ký và Đăng nhập:** Truy cập `http://127.0.0.1:8000/register` để tạo tài khoản hoặc `http://127.0.0.1:8000/login` để đăng nhập.
-2.  **Dashboard:** Sau khi đăng nhập, bạn sẽ được chuyển hướng đến Dashboard cá nhân, nơi hiển thị tổng quan thu nhập và thuế.
-3.  **Quản lý Nguồn Thu nhập:**
-    * Vào mục "Nguồn Thu nhập".
-    * Nhấn "Thêm mới" để khai báo các khoản thu nhập của bạn.
-    * **Lưu ý:** Nhập số tiền thu nhập **hàng tháng** cho từng nguồn.
-4.  **Quản lý Người phụ thuộc:**
-    * Vào mục "Người Phụ thuộc".
-    * Nhấn "Thêm mới" để khai báo thông tin của những người bạn đang nuôi dưỡng.
-5.  **Tính Thuế TNCN:**
-    * Vào mục "Tính Thuế TNCN".
-    * Hệ thống sẽ tự động tổng hợp thu nhập hàng tháng từ các nguồn bạn đã khai báo và số lượng người phụ thuộc.
-    * Nhấn "Tính thuế" để xem số thuế TNCN phải nộp trong tháng.
-    * Bạn có thể chọn "Lưu khai báo" để ghi lại kết quả này.
-6.  **Lịch sử Khai báo & Thống kê Thuế:** Truy cập các mục tương ứng trên thanh điều hướng để xem lại các khai báo đã lưu và biểu đồ thống kê.
-
-### 4.2. Dành cho Quản trị viên (Admin)
-
-1.  **Đăng nhập:** Đăng nhập bằng tài khoản Admin của bạn (`http://127.0.0.1:8000/login`). Hệ thống sẽ tự động chuyển hướng bạn đến Admin Dashboard.
-2.  **Admin Dashboard:** Cung cấp cái nhìn tổng quan về trạng thái hệ thống.
-3.  **Quản lý Người dùng:**
-    * Vào mục "Quản lý Người dùng" trên thanh điều hướng Admin.
-    * Tại đây, bạn có thể xem danh sách tất cả người dùng, chỉnh sửa thông tin của họ (bao gồm cả việc cấp hoặc thu hồi quyền Admin) hoặc xóa tài khoản.
-4.  **Cài đặt Thuế:**
-    * Vào mục "Cài đặt Thuế" trên thanh điều hướng Admin.
-    * **Giảm trừ Gia cảnh:** Thay đổi mức giảm trừ bản thân và người phụ thuộc theo quy định mới nhất.
-    * **Các Bậc thuế Lũy tiến:** Xem, thêm, sửa hoặc xóa các bậc thuế hiện hành. Mọi thay đổi tại đây sẽ ảnh hưởng trực tiếp đến công thức tính thuế cho toàn bộ người dùng.
+* `/dashboard`: Trang tổng quan sau khi đăng nhập, hiển thị thông tin chung và điều hướng.
+* `/income-sources`: Quản lý và theo dõi tất cả các nguồn thu nhập của bạn.
+* `/dependents`: Khai báo và quản lý thông tin người phụ thuộc.
+* `/tax-calculation`: Công cụ tính toán thuế TNCN tự động theo thời gian thực.
+* `/tax-declarations`: Xem lịch sử đầy đủ các bản khai báo thuế đã lưu.
+* `/tax-declarations/{id}`: Truy cập vào trang chi tiết của một bản khai báo thuế cụ thể.
+* `/tax-declarations/{id}/pdf`: Tải xuống bản PDF của một khai báo thuế đã chọn.
+* `/tax-declarations/statistics`: Trang thống kê tổng quan về thu nhập và thuế TNCN theo thời gian.
 
 ---
 
-## 5. Cần trợ giúp?
+## Đóng góp và Hỗ trợ
 
-Nếu bạn gặp bất kỳ vấn đề nào trong quá trình cài đặt hoặc sử dụng, vui lòng kiểm tra tài liệu Laravel hoặc liên hệ với người phát triển.
+Chúng tôi luôn hoan nghênh mọi ý kiến đóng góp để phát triển và cải thiện ứng dụng này. Nếu bạn phát hiện lỗi, có đề xuất tính năng mới hoặc muốn đóng góp mã nguồn, vui lòng:
+* Tạo một **Issue** trên GitHub để báo cáo lỗi hoặc đề xuất.
+* Gửi một **Pull Request** với những cải tiến hoặc tính năng mới của bạn.
+
+---
+
+## Giấy phép
+
+Ứng dụng này được phát hành dưới Giấy phép MIT. Vui lòng xem file `LICENSE` để biết thêm chi tiết.
+
+---

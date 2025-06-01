@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tính Thuế Thu nhập Cá nhân') }}
+            {{ __('Chi tiết Khai báo Thuế') }}
         </h2>
     </x-slot>
 
@@ -9,29 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-gray-900">
 
-                <h3 class="text-xl font-semibold mb-6">Báo cáo Thuế TNCN Tự động</h3>
-
-                {{-- THÔNG BÁO STATUS ĐƯỢC ĐẶT Ở ĐÂY --}}
-                @if(session('status'))
-                    <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
-                        <p>{{ session('status') }}</p>
-                    </div>
-                @endif
-
-                <div class="mb-8 p-4 bg-indigo-50 rounded-lg shadow-sm text-center">
-                    <p class="text-lg font-medium text-gray-700">Tổng thu nhập (Lương GROSS) của bạn từ các nguồn đã khai báo:</p>
-                    <p class="text-4xl font-extrabold text-indigo-800 mt-2">
-                        {{ number_format($grossIncome, 0, ',', '.') }} VNĐ
-                    </p>
-                    <p class="text-sm text-gray-500 mt-2">
-                        Đây là tổng thu nhập bạn đã khai báo trong mục "Nguồn thu nhập".
-                        Hệ thống tự động tính toán thuế dựa trên số liệu này.
-                    </p>
-                </div>
-
-                <hr class="my-8">
-
-                <h4 class="text-2xl font-bold mb-6 text-indigo-700">Kết quả tính toán Thuế TNCN tháng {{ $currentMonth }}/{{ $currentYear }}</h4>
+                <h3 class="text-xl font-semibold mb-6">Chi tiết Khai báo Thuế tháng {{ $declaration->declaration_month }}/{{ $declaration->declaration_year }}</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="p-5 bg-indigo-50 rounded-lg shadow-sm">
@@ -48,7 +26,7 @@
 
                 <div class="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
                     <h6 class="font-bold text-lg text-blue-700 mb-3">1. Các khoản Bảo hiểm bắt buộc (Giảm trừ):</h6>
-                    <p class="mb-2 text-gray-700">Mức đóng bảo hiểm được tính trên <strong>{{ number_format($grossIncome, 0, ',', '.') }} VNĐ</strong> (hoặc mức trần bảo hiểm hiện hành).</p>
+                    <p class="mb-2 text-gray-700">Mức đóng bảo hiểm được tính trên <strong>{{ number_format($grossIncome, 0, ',', '.') }} VNĐ</strong> (hoặc mức trần bảo hiểm tại thời điểm khai báo).</p>
                     <ul class="list-disc list-inside text-gray-600">
                         <li>Bảo hiểm xã hội (BHXH - {{ number_format($taxCalculatorService->getTaxSetting('bhxh_employee_rate') * 100, 2) }}%): <strong>{{ number_format($taxCalculatorService->calculateBhxhDeduction($grossIncome), 0, ',', '.') }} VNĐ</strong></li>
                         <li>Bảo hiểm y tế (BHYT - {{ number_format($taxCalculatorService->getTaxSetting('bhyt_employee_rate') * 100, 2) }}%): <strong>{{ number_format($taxCalculatorService->calculateBhytDeduction($grossIncome), 0, ',', '.') }} VNĐ</strong></li>
@@ -93,7 +71,7 @@
                             @php
                                 $remainingTaxable = $taxableIncome;
                                 $totalPit = 0;
-                                $taxBrackets = $taxCalculatorService->getTaxBrackets();
+                                $taxBrackets = $taxCalculatorService->getTaxBrackets(); // Lấy các bậc thuế hiện hành
                             @endphp
 
                             @foreach ($taxBrackets as $index => $bracket)
@@ -102,6 +80,7 @@
                                 @endif
 
                                 @php
+                                    // Đảm bảo tên cột khớp với CSDL của bạn (ví dụ: min_income, max_income)
                                     $prevUpper = ($index > 0) ? $taxBrackets[$index-1]->max_income : 0;
                                     $bracketAmount = ($bracket->max_income !== null) ? ($bracket->max_income - $prevUpper) : $remainingTaxable;
                                     $taxableInBracket = min($remainingTaxable, $bracketAmount);
@@ -129,20 +108,9 @@
                 </div>
 
                 <div class="mt-8 text-center">
-                    @if ($grossIncome > 0)
-                    <form method="POST" action="{{ route('tax_calculation.index') }}">
-                        @csrf
-                        <input type="hidden" name="gross_income" value="{{ $grossIncome }}">
-                        <x-primary-button type="submit" name="calculate_and_save" value="true">
-                            {{ __('Lưu Khai Báo Thuế tháng này') }}
-                        </x-primary-button>
-                    </form>
-                    @else
-                        <p class="text-gray-600">Bạn chưa có nguồn thu nhập nào được khai báo để tính thuế.</p>
-                        <a href="{{ route('income-sources.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mt-4">
-                            {{ __('Thêm nguồn thu nhập ngay') }}
-                        </a>
-                    @endif
+                    <a href="{{ route('tax_declarations.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        {{ __('Quay lại Lịch sử khai báo') }}
+                    </a>
                 </div>
             </div>
         </div>

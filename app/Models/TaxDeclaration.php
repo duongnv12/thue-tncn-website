@@ -11,27 +11,17 @@ class TaxDeclaration extends Model
 
     protected $fillable = [
         'user_id',
+        'declaration_year',
+        'declaration_month',
         'total_income',
         'total_deductions',
-        'taxable_income',
+        'mandatory_insurance_deductions', // <-- Thêm vào
+        'personal_deduction_amount',    // <-- Thêm vào
+        'dependent_deduction_amount',   // <-- Thêm vào
+        'taxable_income',               // <-- Thêm vào
         'calculated_tax',
-        'declaration_month', // Thêm declaration_month
-        'declaration_year',  // Thêm declaration_year
     ];
 
-    protected $casts = [
-        'total_income' => 'float',
-        'total_deductions' => 'float',
-        'taxable_income' => 'float',
-        'calculated_tax' => 'float',
-        'declaration_month' => 'integer',
-        'declaration_year' => 'integer',
-    ];
-
-    /**
-     * Định nghĩa mối quan hệ với User.
-     * Một khai báo thuế thuộc về một người dùng.
-     */
     public function user()
     {
         return $this->belongsTo(User::class);

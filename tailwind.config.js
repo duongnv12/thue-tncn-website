@@ -1,3 +1,6 @@
+// tailwind.config.js
+import defaultTheme from 'tailwindcss/defaultTheme';
+
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
@@ -9,7 +12,9 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'sans-serif'], // Thêm Inter vào đầu danh sách font chữ sans-serif
+                // Định nghĩa font Inter
+                // 'sans' là font mặc định của Tailwind, chúng ta sẽ override nó
+                'sans': ['Inter', ...defaultTheme.fontFamily.sans],
             },
         },
     },

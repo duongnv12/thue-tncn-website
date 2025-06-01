@@ -1,63 +1,103 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Thống kê Thuế Thu nhập Cá nhân của bạn') }}
+            {{ __('Thống kê Thuế TNCN') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <p class="mb-6">Thống kê tổng thu nhập và tổng thuế phải nộp của bạn theo từng năm, dựa trên các khai báo đã lưu.</p>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-gray-900">
 
-                    @if ($yearlyStats->isEmpty())
-                        <p>Bạn chưa có dữ liệu thống kê. Hãy lưu một số khai báo thuế để xem thống kê!</p>
-                        <a href="{{ route('tax_calculation.index') }}" class="text-blue-600 hover:underline mt-4 block">Đi đến trang Tính Thuế TNCN</a>
-                    @else
-                        @foreach ($yearlyStats as $yearData)
-                            <div class="mb-8 border-b pb-4">
-                                <h3 class="font-semibold text-2xl text-gray-800 mb-4">Năm {{ $yearData['year'] }}</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="bg-indigo-50 p-4 rounded-lg shadow-sm">
-                                        <p class="text-lg font-medium text-indigo-800">Tổng thu nhập năm:</p>
-                                        <p class="text-3xl font-bold text-indigo-900">{{ number_format($yearData['total_income'], 0, ',', '.') }} VNĐ</p>
-                                    </div>
-                                    <div class="bg-red-50 p-4 rounded-lg shadow-sm">
-                                        <p class="text-lg font-medium text-red-800">Tổng thuế phải nộp năm:</p>
-                                        <p class="text-3xl font-bold text-red-900">{{ number_format($yearData['total_tax'], 0, ',', '.') }} VNĐ</p>
-                                    </div>
-                                </div>
+                <h3 class="text-3xl font-bold text-center text-indigo-700 mb-8">Tổng quan Thuế Thu nhập Cá nhân</h3>
 
-                                <h4 class="font-semibold text-lg text-gray-700 mb-3">Chi tiết theo tháng:</h4>
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full leading-normal bg-white border border-gray-200 rounded-lg">
-                                        <thead>
-                                            <tr>
-                                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tháng</th>
-                                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tổng thu nhập (tháng)</th>
-                                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Thuế phải nộp (tháng)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @for ($i = 1; $i <= 12; $i++)
-                                                <tr class="{{ $i % 2 == 0 ? 'bg-gray-50' : 'bg-white' }}">
-                                                    <td class="px-5 py-3 border-b border-gray-200 text-sm">{{ $i }}</td>
-                                                    <td class="px-5 py-3 border-b border-gray-200 text-sm">
-                                                        {{ number_format($yearData['monthly_data'][$i]['income'], 0, ',', '.') }} VNĐ
-                                                    </td>
-                                                    <td class="px-5 py-3 border-b border-gray-200 text-sm">
-                                                        {{ number_format($yearData['monthly_data'][$i]['tax'], 0, ',', '.') }} VNĐ
-                                                    </td>
-                                                </tr>
-                                            @endfor
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        @endforeach
-                    @endif
+                {{-- Thông báo (nếu có) --}}
+                @if(session('status'))
+                    <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
+                        <p>{{ session('status') }}</p>
+                    </div>
+                @endif
+
+                <div class="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-4">Chọn năm xem thống kê</h4>
+                    <form action="{{ route('tax_declarations.statistics') }}" method="GET" class="flex items-center space-x-4">
+                        <label for="year" class="sr-only">Chọn năm:</label>
+                        <select name="year" id="year" class="form-select rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-gray-700">
+                            @foreach($availableYears as $year)
+                                <option value="{{ $year }}" @if($year == $selectedYear) selected @endif>{{ $year }}</option>
+                            @endforeach
+                        </select>
+                        <x-primary-button type="submit">
+                            {{ __('Xem thống kê') }}
+                        </x-primary-button>
+                    </form>
                 </div>
+
+                <hr class="my-8 border-t-2 border-gray-200">
+
+                <h4 class="text-2xl font-bold text-indigo-700 mb-6">Thống kê Thuế TNCN Hàng Năm</h4>
+
+                @if($annualData->isEmpty())
+                    <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-700 p-4 rounded" role="alert">
+                        <p>Chưa có dữ liệu thống kê hàng năm.</p>
+                    </div>
+                @else
+                    <div class="overflow-x-auto mb-10 shadow-md rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-indigo-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Năm</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Tổng thu nhập năm (Gross)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Tổng thuế TNCN phải nộp</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($annualData as $year => $data)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $year }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ number_format($data['total_income_year'], 0, ',', '.') }} VNĐ</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">{{ number_format($data['total_tax_year'], 0, ',', '.') }} VNĐ</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                <hr class="my-8 border-t-2 border-gray-200">
+
+                <h4 class="text-2xl font-bold text-indigo-700 mb-6">Thống kê Thuế TNCN Hàng Tháng (Năm {{ $selectedYear }})</h4>
+
+                @if($fullMonthlyData->isEmpty() || ($fullMonthlyData->sum('total_income_month') == 0 && $fullMonthlyData->sum('total_tax_month') == 0))
+                    <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-700 p-4 rounded" role="alert">
+                        <p>Chưa có dữ liệu thống kê hàng tháng cho năm **{{ $selectedYear }}**.</p>
+                    </div>
+                @else
+                    <div class="overflow-x-auto shadow-md rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-indigo-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Tháng</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Tổng thu nhập tháng (Gross)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Tổng thuế TNCN tháng</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($fullMonthlyData as $monthData)
+                                    <tr class="hover:bg-gray-50">
+                                        {{-- Định dạng tháng in hoa --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <strong>{{ Str::upper($monthData['month']) }}</strong>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ number_format($monthData['total_income_month'], 0, ',', '.') }} VNĐ</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">{{ number_format($monthData['total_tax_month'], 0, ',', '.') }} VNĐ</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>

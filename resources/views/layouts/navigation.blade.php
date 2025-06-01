@@ -48,7 +48,7 @@
                             <x-nav-link :href="route('tax_declarations.index')" :active="request()->routeIs('tax_declarations.index')">
                                 {{ __('Lịch sử Khai báo') }}
                             </x-nav-link>
-                            <x-nav-link :href="route('tax_calculation.statistics')" :active="request()->routeIs('tax_calculation.statistics')">
+                            <x-nav-link :href="route('tax_declarations.statistics')" :active="request()->routeIs('tax_declarations.statistics')">
                                 {{ __('Thống kê Thuế') }}
                             </x-nav-link>
                         @endif
@@ -74,12 +74,6 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
-
-                        @if (Auth::user()->is_admin)
-                            <x-dropdown-link :href="route('admin.dashboard')">
-                                {{ __('Admin Panel') }}
-                            </x-dropdown-link>
-                        @endif
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -134,7 +128,7 @@
                     <x-responsive-nav-link :href="route('tax_declarations.index')" :active="request()->routeIs('tax_declarations.index')">
                         {{ __('Lịch sử Khai báo') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('tax_calculation.statistics')" :active="request()->routeIs('tax_calculation.statistics')">
+                    <x-responsive-nav-link :href="route('tax_declarations.statistics')" :active="request()->routeIs('tax_declarations.statistics')">
                         {{ __('Thống kê Thuế') }}
                     </x-responsive-nav-link>
                 @endif
@@ -151,12 +145,6 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-
-                @if (Auth::user()->is_admin)
-                    <x-responsive-nav-link :href="route('admin.dashboard')">
-                        {{ __('Admin Panel') }}
-                    </x-responsive-nav-link>
-                @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

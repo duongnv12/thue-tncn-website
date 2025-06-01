@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom colors */
+:root {
+    --primary: #2563eb;
+    --secondary: #f59e42;
+}
+
+/* Custom button */
+.btn-primary {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: background-color 0.2s;
+}
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* Card style */
+.card {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.06);
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+}
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+}
+
+/* Fancy heading */
+.heading-gradient {
+    background: linear-gradient(90deg, #2563eb 0%, #f59e42 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Smooth fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+.fade-in {
+    animation: fadeIn 0.7s ease;
+}

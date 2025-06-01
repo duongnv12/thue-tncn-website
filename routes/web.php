@@ -45,17 +45,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/dependents/{dependent}', [DependentController::class, 'destroy'])->name('dependents.destroy');
 
     // Tính toán Thuế TNCN
-    Route::get('/tax-calculation', [TaxCalculationController::class, 'index'])->name('tax_calculation.index');
+    Route::match(['get', 'post'], '/tax-calculation', [TaxCalculationController::class, 'index'])->name('tax_calculation.index');
     Route::post('/tax-calculation/calculate-and-save', [TaxCalculationController::class, 'calculateAndSave'])->name('tax_calculation.calculate_and_save');
-    Route::get('/tax-calculation/statistics', [TaxCalculationController::class, 'statistics'])->name('tax_calculation.statistics');
     Route::get('/tax-declarations/{declaration}/export-pdf', [TaxDeclarationController::class, 'exportPdf'])->name('tax_declarations.export_pdf');
 
 
     // Lịch sử Khai báo Thuế
     Route::get('/tax-declarations', [TaxDeclarationController::class, 'index'])->name('tax_declarations.index');
+    Route::get('/tax-declarations/statistics', [TaxDeclarationController::class, 'statistics'])->name('tax_declarations.statistics');
     Route::get('/tax-declarations/{declaration}', [TaxDeclarationController::class, 'show'])->name('tax_declarations.show');
     Route::delete('/tax-declarations/{declaration}', [TaxDeclarationController::class, 'destroy'])->name('tax_declarations.destroy');
-
 });
 
 
